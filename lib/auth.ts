@@ -34,3 +34,7 @@ declare module "lucia" {
         DatabaseUserAttributes: IUser;
     }
 }
+
+export interface ActionResult {
+    error: string;
+}

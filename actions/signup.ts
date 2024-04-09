@@ -2,7 +2,7 @@
 
 import { Argon2id } from "oslo/password";
 import { cookies } from "next/headers";
-import { lucia } from "@/lib/auth";
+import { ActionResult, lucia } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 import db from "@/lib/db";
@@ -71,9 +71,5 @@ export async function signup(formData: FormData): Promise<ActionResult> {
         sessionCookie.value,
         sessionCookie.attributes
     );
-    return redirect("/");
-}
-
-interface ActionResult {
-    error: string;
+    return redirect("/signup");
 }
