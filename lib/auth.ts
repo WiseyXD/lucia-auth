@@ -1,5 +1,13 @@
 import { Lucia } from "lucia";
-import { adapter } from "./db";
+import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
+import { cookies } from "next/headers";
+import { cache } from "react";
+import type { Session, User } from "lucia";
+
+import type { IUser } from "./db";
+import db from "./db";
+
+const adapter = new PrismaAdapter(db.session, db.user);
 
 export const lucia = new Lucia(adapter, {
     sessionCookie: {
@@ -11,11 +19,18 @@ export const lucia = new Lucia(adapter, {
             secure: process.env.NODE_ENV === "production",
         },
     },
+    getUserAttributes: (attributes) => {
+        return {
+            username: attributes.username,
+            email: attributes.email,
+        };
+    },
 });
 
 // IMPORTANT!
 declare module "lucia" {
     interface Register {
         Lucia: typeof lucia;
+        DatabaseUserAttributes: IUser;
     }
 }

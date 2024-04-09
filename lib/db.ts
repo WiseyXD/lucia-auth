@@ -1,6 +1,18 @@
-import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
-import prisma from "@/prisma";
+import { PrismaClient } from "@prisma/client";
 
-const client = new prisma();
+declare global {
+    // eslint-disable-next-line no-var
+    var prisma: PrismaClient | undefined;
+}
 
-export const adapter = new PrismaAdapter(client.session, client.user);
+const db = global.prisma || new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") global.prisma = db;
+
+export default db;
+
+export interface IUser {
+    email: string;
+    hashed_password: string;
+    username: string;
+}
