@@ -3,10 +3,9 @@
 import { Argon2id } from "oslo/password";
 import { cookies } from "next/headers";
 import { ActionResult, lucia } from "@/lib/auth";
-import jwt from "jsonwebtoken";
-import { redirect } from "next/navigation";
 
 import db from "@/lib/db";
+import { verifyAccount } from "./verifyAccount";
 
 export async function signup(formData: FormData): Promise<ActionResult | null> {
     const username = formData.get("username");
@@ -64,27 +63,8 @@ export async function signup(formData: FormData): Promise<ActionResult | null> {
         },
     });
     // generate a random 6 character long string
-    const code = Math.random().toString(36).substring(2, 8);
-    const token = jwt.sign(
-        { email, userId: newUser.id, code },
-        process.env.JWT_SECRET!,
-        {
-            expiresIn: "5m",
-        }
-    );
 
-    const newEmailVerificationToken = await db.emailVerification.create({
-        data: {
-            code: code,
-            user: { connect: { id: newUser.id } },
-        },
-    });
-
-    const url = `${process.env.NEXT_BASE_URL}/api/verify-email?token=${token}`;
-
-    console.log(url);
-
-    // send mail
+    await verifyAccount({ email: newUser.email, userId: newUser.id });
 
     return null;
 }

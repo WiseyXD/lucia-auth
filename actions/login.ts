@@ -5,8 +5,9 @@ import { cookies } from "next/headers";
 import { ActionResult, lucia } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import db from "@/lib/db";
+import { verifyAccount } from "./verifyAccount";
 
-export async function login(formData: FormData): Promise<ActionResult> {
+export async function login(formData: FormData): Promise<ActionResult | null> {
     const email = formData.get("email");
     if (typeof email !== "string") {
         return {
@@ -54,12 +55,7 @@ export async function login(formData: FormData): Promise<ActionResult> {
         };
     }
 
-    const session = await lucia.createSession(existingUser.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes
-    );
-    return redirect("/");
+    await verifyAccount({ email: existingUser.email, userId: existingUser.id });
+
+    return null;
 }
